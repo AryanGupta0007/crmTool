@@ -1,40 +1,18 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose'); 
-const fs = require("fs");
-const logger = require("./logger");
+const connectDB = require('./utils/db');
+const adminRoutes = require('./routes/admin');
+const employeeRoutes = require('./routes/employee');
 
-// const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Ensure the logs directory exists
-const logDirectory = "logs";
-if (!fs.existsSync(logDirectory)) {
-fs.mkdirSync(logDirectory);
-}
+connectDB();
 
 app.use(express.json());
-
-// Middleware to log all requests
-app.use((req, res, next) => {
-logger.info(`${req.method} ${req.url}`);
-next();
-});
-
-mongoose.connect(process.env.MONGODB_URI, {
-useNewUrlParser: true,
-useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-// app.use('/api/auth', authRoutes);
-// app.use('/api/ride', rideRoutes);
-// app.use('/api/payment', paymentRoutes);
-// app.use('/api/user', userRoutes); // New
-// app.use('/api/driver', driverRoutes); // New
+app.use('/admin', adminRoutes);
+app.use('/employee', employeeRoutes);
 
 app.listen(PORT, () => {
-logger.info(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
