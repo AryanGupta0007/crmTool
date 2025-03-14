@@ -1,4 +1,3 @@
-Drive\Desktop\CRM\backend\controllers\adminController.js
 const Lead = require('../models/lead');
 const Employee = require('../models/employee');
 const excelService = require('../services/excelService');
