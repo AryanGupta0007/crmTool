@@ -9,4 +9,4 @@ const leadSchema = new mongoose.Schema({
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }
 });
 
-module.exports = mongoose.model('Lead', leadSchema);
+module.exports = mongoose.models.Lead || mongoose.model('Lead', leadSchema);

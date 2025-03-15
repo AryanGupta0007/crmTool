@@ -1,4 +1,4 @@
-const Lead = require('../models/lead');
+const Lead = require('../models/Lead');
 
 exports.updateLeadStatus = async (req, res) => {
     try {
@@ -12,5 +12,14 @@ exports.updateLeadStatus = async (req, res) => {
         res.status(200).json(lead);
     } catch (error) {
         res.status(500).json({ message: 'Error updating lead status', error });
+    }
+};
+
+exports.getLeads = async (req, res) => {
+    try {
+        const leads = await Lead.find({ assignedTo: req.user.id });
+        res.status(200).json(leads);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching leads', error });
     }
 };
