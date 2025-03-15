@@ -11,12 +11,4 @@ const adminSchema = new mongoose.Schema({
     }
 });
 
-// adminSchema.pre('save', function (next) {
-//     if (!this.isModified('password')) {
-//         return next();
-//     }
-//     this.password = bcrypt.hashSync(this.password, 10);
-//     next();
-// });
-
-module.exports = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
+module.exports = mongoose.model('Admin', adminSchema);

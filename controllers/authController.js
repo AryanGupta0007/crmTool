@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 const Admin = require('../models/Admin');
 const Employee = require('../models/Employee');
 
-const JWT_SECRET = "JLFSJLFSLJfsjflsaj"
+const JWT_SECRET = "JLFSJLFSLJfsjflsaj";
+
 exports.login = async (req, res) => {
     const { email, password, role } = req.body;
     try {
@@ -19,25 +20,33 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role }, JWT_SECRET, { expiresIn: '1d' });
-        res.json({ authToken: token, role });
+        res.json({ authToken: token, role:role });
     } catch (error) {
         res.status(500).json({ msg: 'Server error' });
     }
 };
 
 exports.verifyToken = (req, res, next) => {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const token = req.headers["authorization"];
+    console.log(`token: ${token}`)
     if (!token) {
-        return res.status(401).json({ msg: 'No token, authorization denied' });
+        return res.status(403).send({ message: "No token provided!" });
     }
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        req.user = decoded;
-        next();
-    } catch (error) {
-        res.status(401).json({ msg: 'Token is not valid' });
+    const bearerToken = token.split(" ")[1];
+    if (!bearerToken) {
+        return res.status(403).send({ message: "Invalid token format!" });
     }
+
+    jwt.verify(bearerToken, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: "Unauthorized!" });
+        }
+        console.log(`decoded: ${decoded.id}`)
+        req.userId = decoded.id;
+        // console.log(`userID: ${req.userId}}`)
+        next();
+    });
 };
 
 exports.register = async (req, res) => {

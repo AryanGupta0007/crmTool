@@ -4,5 +4,6 @@ const employeeController = require('../controllers/employeeController');
 
 router.post('/updateLeadStatus', employeeController.updateLeadStatus);
 router.get('/leads', employeeController.getLeads);
+router.get('/sales', employeeController.getSalesLeads); // Add sales route
 
 module.exports = router;

@@ -4,11 +4,27 @@ const excelService = require('../services/excelService');
 
 exports.addLeads = async (req, res) => {
     try {
+        console.log("here")
         const leads = excelService.parseExcel(req.file.path);
+        console.log(`leads ${leads}`)
         const uniqueLeads = await excelService.processLeads(leads);
-        const insertedLeads = await Lead.insertMany(uniqueLeads, { ordered: false });
+        console.log(`unique ${uniqueLeads[0]}`)
+        const filteredLeads = uniqueLeads.map(lead => ({
+            name: lead.name,
+            contactNumber: lead.contact,
+            email: lead.email
+        }));
+        console.log(filteredLeads)
+        const insertedLeads = [];
+        for (const lead of filteredLeads) {
+            const newLead = new Lead(lead);
+            await newLead.save();
+            insertedLeads.push(newLead);
+        }
+
         res.status(201).json(insertedLeads);
     } catch (error) {
+        console.log(`error adding leads ${error}`)
         res.status(500).json({ message: 'Error adding leads', error });
     }
 };
@@ -65,6 +81,15 @@ exports.getUnassignedLeads = async (req, res) => {
     }
 };
 
+exports.getLeads = async (req, res) => {
+    try {
+        const leads = await Lead.find();
+        res.status(200).json(leads);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching leads', error });
+    }
+};
+
 exports.assignLead = async (req, res) => {
     try {
         const { leadId, callerId } = req.body;
@@ -84,5 +109,14 @@ exports.getRevenue = async (req, res) => {
         res.status(200).json(totalRevenue);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching revenue', error });
+    }
+};
+
+exports.getSalesLeads = async (req, res) => {
+    try {
+        const salesLeads = await Lead.find({ status: 'closed-success' });
+        res.status(200).json(salesLeads);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching sales leads', error });
     }
 };
