@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role }, JWT_SECRET, { expiresIn: '1d' });
-        res.json({ authToken: token, role:role });
+        res.json({ authToken: token, role: role });
     } catch (error) {
         res.status(500).json({ msg: 'Server error' });
     }
@@ -50,7 +50,7 @@ exports.verifyToken = (req, res, next) => {
 };
 
 exports.register = async (req, res) => {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, type } = req.body;
     try {
         if (!['admin', 'employee'].includes(role)) {
             return res.status(400).json({ msg: 'Invalid role' });
@@ -70,7 +70,7 @@ exports.register = async (req, res) => {
             if (user) {
                 return res.status(400).json({ msg: 'Employee already registered' });
             }
-            user = new Employee({ email, name, password: hashedPassword });
+            user = new Employee({ email, name, password: hashedPassword, type });
         }
 
         await user.save();

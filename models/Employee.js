@@ -5,7 +5,7 @@ const employeeSchema = new mongoose.Schema({
     contactNumber: { type: String, required: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    type: {type: String, enums: ["sales", "accounts"]},
+    type: {type: String, enums: ["sales", "accounts"], required: true, default: "sales"},
     leads: {
         alloted: { type: Number, default: 0 },
         lead_details: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lead' }]

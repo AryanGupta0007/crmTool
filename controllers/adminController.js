@@ -22,10 +22,40 @@ exports.addLeads = async (req, res) => {
             insertedLeads.push(newLead);
         }
 
+        // Automatically allot leads to sales employees
+        await exports.autoAllotLeads(insertedLeads);
+
         res.status(201).json(insertedLeads);
     } catch (error) {
         console.log(`error adding leads ${error}`)
         res.status(500).json({ message: 'Error adding leads', error });
+    }
+};
+
+exports.autoAllotLeads = async (leads) => {
+    try {
+        const salesEmployees = await Employee.find({ type: 'sales' });
+        if (salesEmployees.length === 0) {
+            console.log('No sales employees found');
+            return;
+        }
+
+        let employeeIndex = 0;
+        for (const lead of leads) {
+            const employee = salesEmployees[employeeIndex];
+            employee.leads.lead_details.push(lead._id);
+            employee.leads.alloted += 1;
+            await employee.save();
+
+            lead.assignedTo = employee._id;
+            await lead.save();
+
+            employeeIndex = (employeeIndex + 1) % salesEmployees.length;
+        }
+
+        console.log('Leads auto-allotted to sales employees');
+    } catch (error) {
+        console.log(`Error auto-allotting leads: ${error}`);
     }
 };
 
@@ -65,7 +95,8 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getCallers = async (req, res) => {
     try {
-        const callers = await Employee.find();
+        const callers = await Employee.find({ type: "sales" });
+        console.log(`Callers ${callers}`)
         res.status(200).json(callers);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching callers', error });
