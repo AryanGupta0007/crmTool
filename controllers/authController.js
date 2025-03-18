@@ -28,7 +28,7 @@ exports.login = async (req, res) => {
 
 exports.verifyToken = (req, res, next) => {
     const token = req.headers["authorization"];
-    console.log(`token: ${token}`)
+    // console.log(`token: ${token}`)
     if (!token) {
         return res.status(403).send({ message: "No token provided!" });
     }
@@ -42,7 +42,7 @@ exports.verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).send({ message: "Unauthorized!" });
         }
-        console.log(`decoded: ${decoded.id}`)
+        // console.log(`decoded: ${decoded.id}`)
         req.userId = decoded.id;
         // console.log(`userID: ${req.userId}}`)
         next();

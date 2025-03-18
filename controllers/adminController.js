@@ -4,23 +4,24 @@ const excelService = require('../services/excelService');
 
 exports.addLeads = async (req, res) => {
     try {
-        console.log("here")
+        // console.log("here")
         const leads = excelService.parseExcel(req.file.path);
-        console.log(`leads ${leads}`)
+        // console.log(`leads ${leads}`)
         const uniqueLeads = await excelService.processLeads(leads);
-        console.log(`unique ${uniqueLeads[0]}`)
+        // console.log(`unique ${uniqueLeads[0]}`)
         const filteredLeads = uniqueLeads.map(lead => ({
             name: lead.name,
             contactNumber: lead.contact,
             email: lead.email
         }));
-        console.log(filteredLeads)
+        // console.log(filteredLeads)
         const insertedLeads = [];
         for (const lead of filteredLeads) {
             const newLead = new Lead(lead);
             await newLead.save();
             insertedLeads.push(newLead);
         }
+        console.log(`inserted leads: ${insertedLeads}`)
 
         // Automatically allot leads to sales employees
         await exports.autoAllotLeads(insertedLeads);
@@ -35,27 +36,66 @@ exports.addLeads = async (req, res) => {
 exports.autoAllotLeads = async (leads) => {
     try {
         const salesEmployees = await Employee.find({ type: 'sales' });
+        console.log(salesEmployees)
         if (salesEmployees.length === 0) {
             console.log('No sales employees found');
             return;
         }
 
         let employeeIndex = 0;
-        for (const lead of leads) {
-            const employee = salesEmployees[employeeIndex];
-            employee.leads.lead_details.push(lead._id);
-            employee.leads.alloted += 1;
-            await employee.save();
+        const employeeLeadCounts = salesEmployees.map(employee => ({
+            employee,
+            allotted: 0
+        }));
 
-            lead.assignedTo = employee._id;
+        for (const lead of leads) {
+            console.log(`lead: ${lead}`)
+            let attempts = 0;
+            while (employeeLeadCounts[employeeIndex].allotted >= employeeLeadCounts[employeeIndex].employee.leads.needed) {
+                console.log(`index: ${employeeIndex}`)
+                employeeIndex = (employeeIndex + 1) % salesEmployees.length;
+                attempts++;
+                if (attempts >= salesEmployees.length) {
+                    console.log('All employees have reached their needed leads limit');
+                    return;
+                }
+            }   
+
+            const employeeLeadCount = employeeLeadCounts[employeeIndex];
+            console.log(`employeeLeadCount: ${employeeLeadCount}`)
+            employeeLeadCount.employee.leads.lead_details.push(lead._id);
+            employeeLeadCount.employee.leads.alloted += 1; // Increase the alloted value
+            employeeLeadCount.allotted += 1;
+            await employeeLeadCount.employee.save();
+
+            lead.assignedTo = employeeLeadCount.employee._id;
             await lead.save();
 
             employeeIndex = (employeeIndex + 1) % salesEmployees.length;
         }
 
         console.log('Leads auto-allotted to sales employees');
+        return 
     } catch (error) {
         console.log(`Error auto-allotting leads: ${error}`);
+        return
+    }
+};
+
+exports.updateNeededLeads = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { neededLeads } = req.body;
+        const employee = await Employee.findById(id);
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+        // console.log(`employee leads: ${employee.leads}`)
+        employee.leads.needed = neededLeads;
+        await employee.save();
+        res.status(200).json(employee);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating needed leads', error });
     }
 };
 
@@ -96,7 +136,7 @@ exports.getDashboardStats = async (req, res) => {
 exports.getCallers = async (req, res) => {
     try {
         const callers = await Employee.find({ type: "sales" });
-        console.log(`Callers ${callers}`)
+        // console.log(`Callers ${callers}`)
         res.status(200).json(callers);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching callers', error });
@@ -135,9 +175,9 @@ exports.assignLead = async (req, res) => {
 
 exports.getRevenue = async (req, res) => {
     try {
-        // Replace with actual revenue calculation logic
-        const totalRevenue = 5700;
-        res.status(200).json(totalRevenue);
+        const leads = await Lead.find({ status: 'closed-success', operationStatus: 'completed' });
+        const totalRevenue = leads.reduce((sum, lead) => sum + parseFloat(lead.amount || 0), 0);
+        res.status(200).json({ totalRevenue });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching revenue', error });
     }

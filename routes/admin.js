@@ -14,5 +14,5 @@ router.get('/leads', authController.verifyToken, adminController.getLeads);
 router.post('/assignLead', authController.verifyToken, adminController.assignLead);
 router.get('/revenue', authController.verifyToken, adminController.getRevenue);
 router.get('/sales', authController.verifyToken, adminController.getSalesLeads); // Add sales route
-
+router.put('/updateNeededLeads/:id', authController.verifyToken, adminController.updateNeededLeads); // Add route to update needed leads
 module.exports = router;

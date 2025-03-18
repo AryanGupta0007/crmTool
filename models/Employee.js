@@ -5,11 +5,13 @@ const employeeSchema = new mongoose.Schema({
     contactNumber: { type: String, required: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    type: {type: String, enums: ["sales", "accounts"], required: true, default: "sales"},
+    type: {type: String, enums: ["sales", "accounts", "operations"], required: true, default: "sales"},
     leads: {
+        needed: {type: Number, default: 0},
         alloted: { type: Number, default: 0 },
         lead_details: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lead' }]
     }
+
 });
 
 module.exports = mongoose.model('Employee', employeeSchema);
