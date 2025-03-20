@@ -7,6 +7,8 @@ const employeeRoutes = require('../routes/employee'); // Correctly import employ
 const authRoutes = require('../routes/auth');
 const accountsRoutes = require('../routes/accountsRoutes'); // Add accounts routes
 const operationsRoutes = require('../routes/operationsRoutes'); // Add operations routes
+const genRoutes = require('../routes/operationsRoutes'); // Add operations routes
+
 const path = require('path');
 const { verifyToken } = require('../controllers/authController');
 
@@ -22,6 +24,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/employee', verifyToken, employeeRoutes); // Use employee routes
 app.use('/api/accounts', accountsRoutes); // Use accounts routes
 app.use('/api/operations', operationsRoutes); // Use operations routes
+app.use('/api/gen', genRoutes); // Use operations routes
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads directory
 
 app.listen(PORT, () => {

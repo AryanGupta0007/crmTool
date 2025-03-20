@@ -11,12 +11,12 @@ exports.getClosedSuccessLeads = async (req, res) => {
 
 exports.updateOperationStatus = async (req, res) => {
     try {
-        const { leadId, operationStatus } = req.body;
+        const { leadId, field, value } = req.body;
         const lead = await Lead.findById(leadId);
         if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }
-        lead.operationStatus = operationStatus;
+        lead[field] = value;
         await lead.save();
         res.status(200).json(lead);
     } catch (error) {

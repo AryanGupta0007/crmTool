@@ -1,6 +1,8 @@
 const Lead = require('../models/Lead');
 const Employee = require('../models/Employee');
+const Batch = require('../models/Batch');
 const excelService = require('../services/excelService');
+const { Parser } = require('json2csv');
 
 exports.addLeads = async (req, res) => {
     try {
@@ -99,6 +101,7 @@ exports.updateNeededLeads = async (req, res) => {
     }
 };
 
+
 exports.allotLeads = async (req, res) => {
     try {
         const { employeeId, leadIds } = req.body;
@@ -112,6 +115,27 @@ exports.allotLeads = async (req, res) => {
         res.status(500).json({ message: 'Error allotting leads', error });
     }
 };
+
+exports.getDashboardStats = async (req, res) => {
+    try {
+        const totalLeads = await Lead.countDocuments();
+        const assignedLeads = await Lead.countDocuments({ assignedTo: { $ne: null } });
+        const unassignedLeads = totalLeads - assignedLeads;
+        const totalEmployees = await Employee.countDocuments();
+        const recentActivities = []; // Add logic to fetch recent activities if needed
+
+        res.status(200).json({
+            totalLeads,
+            assignedLeads,
+            unassignedLeads,
+            totalEmployees,
+            recentActivities
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching dashboard stats', error });
+    }
+};
+
 
 exports.getDashboardStats = async (req, res) => {
     try {
@@ -189,5 +213,96 @@ exports.getSalesLeads = async (req, res) => {
         res.status(200).json(salesLeads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching sales leads', error });
+    }
+};
+
+exports.downloadEmployeeLeads = async (req, res) => {
+    try {
+        const { employeeId } = req.params;
+        const leads = await Lead.find({ assignedTo: employeeId });
+
+        if (!leads.length) {
+            return res.status(404).json({ message: 'No leads found for this employee' });
+        }
+
+        const fields = [
+            'name',
+            'contactNumber',
+            'email',
+            'status',
+            'boardsPass',
+            'boardsEnglish',
+            'boardsPCM',
+            'followUpDate',
+            'salesStatus',
+            'batch',
+            'formSs',
+            'books',
+            'booksSs',
+            'assignedTo',
+            'paymentVerified',
+            'amount',
+            'comment',
+            'paymentProof',
+            'addedToGroup',
+            'registeredOnApp'
+        ];
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(leads);
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment(`employee_${employeeId}_leads.csv`);
+        res.send(csv);
+    } catch (error) {
+        console.error('Error downloading leads:', error);
+        res.status(500).json({ message: 'Error downloading leads', error });
+    }
+};
+
+exports.addBatch = async(req, res) => {
+    try{
+        const {name, price, booksPrice} = req.body;
+        const batch = new Batch({
+            name,
+            price,
+            booksPrice
+        })
+        await batch.save()
+        res.status(200).json({batch})
+    }
+    catch(error){
+        res.status(500).json({error})
+
+    }
+}
+
+exports.deleteEmployee = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const employee = await Employee.findById(id);
+
+        if (!employee) {
+            return res.status(404).json({ message: 'Employee not found' });
+        }
+
+        // Option 1: Remove the employee from the database
+        // await employee.remove();
+
+        // Option 2: Update the employee's status to "deleted"
+        employee.status = "deleted";
+        await employee.save();
+
+        res.status(200).json({ message: 'Employee and assigned leads removed successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting employee', error });
+    }
+};
+
+exports.getBatches = async (req, res) => {
+    try {
+        const batches = await Batch.find();
+        res.status(200).json(batches);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching batches', error });
     }
 };

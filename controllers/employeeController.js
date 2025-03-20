@@ -2,39 +2,35 @@ const Lead = require('../models/Lead');
 const path = require('path');
 const fs = require('fs');
 
-exports.updateLeadStatus = async (req, res) => {
+exports.updateLeadField = async (req, res) => {
     try {
-        const { leadId, status } = req.body;
+        const { leadId, field, value } = req.body;
         const lead = await Lead.findById(leadId);
-        lead.status = status;
-        if (status === 'follow up') {
-            lead.followUpDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days later
+
+        if (!lead) {
+            return res.status(404).json({ message: 'Lead not found' });
         }
-        await lead.save();
-        console.log(`updated ${lead}`)
-        res.status(200).json(lead);
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating lead status', error });
-    }
-};
 
+        // Update the specified field
+        lead[field] = value;
 
+        // Handle specific logic for certain fields
+        if (field === 'status' && value === 'follow up') {
+            lead.followUpDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days later
+        } else if (field === 'formSs' && value) {
+            lead.status = 'under-review';
+        }
 
-exports.updateLeadComment = async (req, res) => {
-    try {
-        const { leadId, comment } = req.body;
-        const lead = await Lead.findById(leadId);
-        lead.comment = comment;
         await lead.save();
         res.status(200).json(lead);
     } catch (error) {
-        res.status(500).json({ message: 'Error updating lead comment', error });
+        res.status(500).json({ message: 'Error updating lead field', error });
     }
 };
 
 exports.uploadPaymentProof = async (req, res) => {
     try {
-        const { leadId } = req.body;
+        const { leadId, proofType } = req.body;
         console.log(`leadId: ${leadId}`)
         const lead = await Lead.findById(leadId);
         console.log(lead)
@@ -46,10 +42,21 @@ exports.uploadPaymentProof = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const filePath = path.join(__dirname, '../uploads', req.file.filename );
+        const filePath = path.join(__dirname, '../uploads', req.file.filename);
         console.log(`uploaded filename: ${req.file.filename}`)
-        lead.paymentProof = req.file.filename;
-        lead.status = "under-review"
+        if (proofType === "payment") {
+            lead.paymentProof = req.file.filename;
+        }
+        else if (proofType == "book") {
+            lead.booksSs = req.file.filename;
+        }
+
+        else if (proofType == "form") {
+            lead.formSs = req.file.filename;
+            lead.status = "under-review"
+        }
+
+
         await lead.save();
 
         res.status(200).json({ message: 'Payment proof uploaded successfully', lead });
@@ -67,6 +74,18 @@ exports.getLeads = async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Error fetching leads', error });
+    }
+};
+
+exports.getFollowUps = async (req, res) => {
+    try {
+        const leads = await Lead.find({ assignedTo: req.userId });
+        const today = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+        const followUpsToday = leads.filter(lead => lead.followUpDate === today);
+        res.status(200).json(followUpsToday);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error fetching follow-ups', error });
     }
 };
 

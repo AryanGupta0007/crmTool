@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const employeeController = require('../controllers/employeeController');
+const authController = require('../controllers/authController');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
-const employeeController = require('../controllers/employeeController');
 
-router.post('/updateLeadStatus', employeeController.updateLeadStatus);
-router.get('/leads', employeeController.getLeads);
-router.get('/sales', employeeController.getSalesLeads); // Add sales route
-router.put('/updateLeadComment', employeeController.updateLeadComment); // Add route to update lead comment
-router.post('/uploadPaymentProof', upload.single('proof'), employeeController.uploadPaymentProof); // Add route to upload payment proof
+router.get('/leads', authController.verifyToken, employeeController.getLeads);
+router.post('/updateLeadField', authController.verifyToken, employeeController.updateLeadField);
+router.post('/uploadPaymentProof', authController.verifyToken, upload.single('file'), employeeController.uploadPaymentProof);
+router.get('/follow-ups', authController.verifyToken, employeeController.getFollowUps);
 
 module.exports = router;
