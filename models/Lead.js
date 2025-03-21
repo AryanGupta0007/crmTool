@@ -10,7 +10,7 @@ const leadSchema = new mongoose.Schema({
     boardsPCM: { type: String, enum: ['<60', '>60 AND <65','>65 AND <70','>70 AND <80','>80 AND <90','>90 ']},
     followUpDate: { type: String, default: null },
     salesStatus: {type: String, default: null},
-    batch: {type: String, default: null},
+    batch: {type: mongoose.Schema.Types.ObjectId, ref: "batch"},
     formSs: {type: String, default: null},
     books: {type: Boolean, default: null},
     booksSs: {type: String, default: null},    

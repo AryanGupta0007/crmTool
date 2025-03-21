@@ -10,23 +10,7 @@ exports.updateLeadField = async (req, res) => {
         if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }
-        let amount;
-        if (field === "batch"){
-            const batch = await Batch.find({name: field, status: 'active'})
-            amount = batch.amount
-            booksPrice = batch.booksPrice
-            lead["amount"] = amount 
-        }
         
-        if (field === "books"){
-            const batch = await Batch.find({name: field, status: 'active'})
-            amount = batch.amount
-            booksPrice = batch.booksPrice
-            if (value === true){
-                lead["amount"] = amount + booksPrice
-            }
-             
-        }
         // Update the specified field
         lead[field] = value;
         
@@ -87,7 +71,7 @@ exports.uploadPaymentProof = async (req, res) => {
 exports.getLeads = async (req, res) => {
     try {
         const leads = await Lead.find({ assignedTo: req.userId });
-        console.log(leads)
+        // console.log(leads)
         res.status(200).json(leads);
     } catch (error) {
         console.log(error)
