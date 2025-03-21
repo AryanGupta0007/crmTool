@@ -1,7 +1,7 @@
 const Lead = require('../models/Lead');
 const path = require('path');
 const fs = require('fs');
-
+const Batch = require('../models/Batch')
 exports.updateLeadField = async (req, res) => {
     try {
         const { leadId, field, value } = req.body;
@@ -10,9 +10,27 @@ exports.updateLeadField = async (req, res) => {
         if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }
-
+        let amount;
+        if (field === "batch"){
+            const batch = await Batch.find({name: field, status: 'active'})
+            amount = batch.amount
+            booksPrice = batch.booksPrice
+            lead["amount"] = amount 
+        }
+        
+        if (field === "books"){
+            const batch = await Batch.find({name: field, status: 'active'})
+            amount = batch.amount
+            booksPrice = batch.booksPrice
+            if (value === true){
+                lead["amount"] = amount + booksPrice
+            }
+             
+        }
         // Update the specified field
         lead[field] = value;
+        
+    
 
         // Handle specific logic for certain fields
         if (field === 'status' && value === 'follow up') {

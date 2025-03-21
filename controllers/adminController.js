@@ -159,7 +159,7 @@ exports.getDashboardStats = async (req, res) => {
 
 exports.getCallers = async (req, res) => {
     try {
-        const callers = await Employee.find({ type: "sales" });
+        const callers = await Employee.find({ type: "sales", status: "active" });
         // console.log(`Callers ${callers}`)
         res.status(200).json(callers);
     } catch (error) {
