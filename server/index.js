@@ -17,6 +17,19 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
+try{
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+}
+catch(err){
+    console.log("build doesn't exist")
+}
+
 app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 app.use('/api/auth', authRoutes);
