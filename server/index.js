@@ -17,17 +17,18 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
-// try{
-// // Serve static files from React build
-// app.use(express.static(path.join(__dirname, '../../CRM-Frontend/dist')));
+try{
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '../../CRM-Frontend/dist')));
 
-// // Handle React routing, return all requests to React app
-// app.get('*', function(req, res) {
-//   res.sendFile(path.join(__dirname, '../../CRM-Frontend/dist', 'index.html'));
-// });}
-// catch(err){
-//     console.log("build doesn't exist")
-// }
+// Handle React routing, return all requests to React app
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, '../../CRM-Frontend/dist', 'index.html'));
+
+});}
+catch(err){
+    console.log("build doesn't exist")
+}
 
 // Use CORS with detailed configuration
 app.use(cors({
@@ -35,7 +36,13 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
+app.disable('etag');
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
