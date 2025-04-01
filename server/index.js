@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, '../../CRM-frontend/build')));
 // Handle React routing, return all requests to React app
 app.get('*', function(req, res) {
   res.sendFile(path.join(__dirname, '../../CRM-frontend/build', 'index.html'));
-});
+});}
 catch(err){
     console.log("build doesn't exist")
 }
