@@ -136,7 +136,6 @@ exports.getDashboardStats = async (req, res) => {
     }
 };
 
-
 exports.getDashboardStats = async (req, res) => {
     try {
         const totalLeads = await Lead.countDocuments();
@@ -199,11 +198,33 @@ exports.assignLead = async (req, res) => {
 
 exports.getRevenue = async (req, res) => {
     try {
-        const leads = await Lead.find({ status: 'closed-success', operationStatus: 'completed' });
-        const totalRevenue = leads.reduce((sum, lead) => sum + parseFloat(lead.amount || 0), 0);
+        const leads = await Lead.find({ paymentVerified: 'verified', status: 'closed-success' }).populate('batch');
+        const totalRevenue = leads.reduce((sum, lead) => {
+            const batchPrice = lead.batch?.price || 0;
+            const booksPrice = lead.books ? lead.batch?.booksPrice || 0 : 0;
+            return sum + parseFloat(batchPrice) + parseFloat(booksPrice);
+        }, 0);
         res.status(200).json({ totalRevenue });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching revenue', error });
+    }
+};
+
+exports.getRevenuePerSale = async (req, res) => {
+    try {
+        const leads = await Lead.find({ paymentVerified: 'verified', status: 'closed-success' }).populate('batch');
+        const revenuePerSale = leads.map(lead => {
+            const batchPrice = lead.batch?.price || 0;
+            const booksPrice = lead.books ? lead.batch?.booksPrice || 0 : 0;
+            return {
+                leadId: lead._id,
+                customer: lead.name,
+                revenue: parseFloat(batchPrice) + parseFloat(booksPrice)
+            };
+        });
+        res.status(200).json(revenuePerSale);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching revenue per sale', error });
     }
 };
 
@@ -304,5 +325,35 @@ exports.getBatches = async (req, res) => {
         res.status(200).json(batches);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching batches', error });
+    }
+};
+
+exports.updateBatchStatus = async (req, res) => {
+    try {
+        const { batchId } = req.params;
+        const { status } = req.body;
+
+        const batch = await Batch.findById(batchId);
+        if (!batch) {
+            return res.status(404).json({ message: "Batch not found" });
+        }
+
+        batch.status = status;
+        await batch.save();
+
+        res.status(200).json({ message: "Batch status updated successfully", batch });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating batch status", error });
+    }
+};
+
+exports.getVerifiedLeads = async (req, res) => {
+    try {
+        console.log('leads')
+        const leads = await Lead.find({ paymentVerified: 'verified' }).populate('batch');
+        res.status(200).json(leads);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Error fetching verified leads', error });
     }
 };

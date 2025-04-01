@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role }, JWT_SECRET, { expiresIn: '1d' });
-        res.json({ authToken: token, role: role });
+        res.json({ authToken: token, role: role, user });
     } catch (error) {
         res.status(500).json({ msg: 'Server error' });
     }
@@ -75,7 +75,7 @@ exports.register = async (req, res) => {
 
         await user.save();
         const token = jwt.sign({ id: user._id, role }, JWT_SECRET, { expiresIn: '1d' });
-        res.status(201).json({ authToken: token, role });
+        res.status(201).json({ authToken: token, role, user });
     } catch (error) {
         console.error('Error creating user:', error);
         res.status(500).json({ msg: 'Server error', error });
