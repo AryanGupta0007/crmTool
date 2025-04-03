@@ -198,7 +198,7 @@ exports.assignLead = async (req, res) => {
 
 exports.getRevenue = async (req, res) => {
     try {
-        const leads = await Lead.find({ paymentVerified: 'verified', status: 'closed-success' }).populate('batch');
+        const leads = await Lead.find({ paymentVerified: 'verified' }).populate('batch');
         const totalRevenue = leads.reduce((sum, lead) => {
             const batchPrice = lead.batch?.price || 0;
             const booksPrice = lead.books ? lead.batch?.booksPrice || 0 : 0;
