@@ -29,18 +29,17 @@ exports.parseExcel = (filePath) => {
 };
 
 exports.processLeads = async (leads) => {
-    console.log('processing leads')
-    const uniqueLeads = [];
-
-  for (const leadData of leads) {
-    console.log(`leadData: ${leadData}`)
-    const { name, email, contact } = leadData;
-    const status = "new"
-    const existingLead = await Lead.findOne({ email });
-    if (!existingLead) {
-      uniqueLeads.push({ name, contact, email, status });
+    // Check if leads already contain extended fields (e.g., "status")
+    if (leads.length > 0 && leads[0].hasOwnProperty("status")) {
+        // Extended file: return leads as-is (or additional processing if needed)
+        return leads;
+    } else {
+        // Fallback: map fields from legacy file format
+        return leads.map(lead => ({
+            name: lead.name,
+            contactNumber: lead.contact,  // map "contact" to contactNumber
+            email: lead.email,
+            status: "new"
+        }));
     }
-  }
-  console.log(uniqueLeads)
-  return uniqueLeads;
 };

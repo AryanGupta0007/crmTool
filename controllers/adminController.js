@@ -6,17 +6,42 @@ const { Parser } = require('json2csv');
 
 exports.addLeads = async (req, res) => {
     try {
-        // console.log("here")
+        // Parse the Excel file
         const leads = excelService.parseExcel(req.file.path);
-        // console.log(`leads ${leads}`)
         const uniqueLeads = await excelService.processLeads(leads);
-        // console.log(`unique ${uniqueLeads[0]}`)
-        const filteredLeads = uniqueLeads.map(lead => ({
-            name: lead.name,
-            contactNumber: lead.contact,
-            email: lead.email
-        }));
-        // console.log(filteredLeads)
+        
+        // If extended fields are present, map all fields; otherwise, use fallback mapping
+        let filteredLeads;
+        if(uniqueLeads.length > 0 && uniqueLeads[0].hasOwnProperty("status")){
+            filteredLeads = uniqueLeads.map(lead => ({
+                name: lead.name,
+                contactNumber: lead.contactNumber, 
+                email: lead.email,
+                status: lead.status,
+                boardsPass: lead.boardsPass,
+                boardsEnglish: lead.boardsEnglish,
+                boardsPCM: lead.boardsPCM,
+                followUpDate: lead.followUpDate,
+                salesStatus: lead.salesStatus,
+                batch: lead.batch,
+                formSs: lead.formSs,
+                books: lead.books,
+                booksSs: lead.booksSs,
+                paymentVerified: lead.paymentVerified,
+                amount: lead.amount,
+                comment: lead.comment,
+                paymentProof: lead.paymentProof,
+                addedToGroup: lead.addedToGroup,
+                registeredOnApp: lead.registeredOnApp
+            }));
+        } else {
+            filteredLeads = uniqueLeads.map(lead => ({
+                name: lead.name,
+                contactNumber: lead.contact,
+                email: lead.email
+            }));
+        }
+        // ...existing code...
         const insertedLeads = [];
         for (const lead of filteredLeads) {
             const newLead = new Lead(lead);
@@ -300,18 +325,11 @@ exports.addBatch = async(req, res) => {
 exports.deleteEmployee = async (req, res) => {
     try {
         const { id } = req.params;
-        const employee = await Employee.findById(id);
+        const employee = await Employee.findOneAndDelete(id);
 
         if (!employee) {
             return res.status(404).json({ message: 'Employee not found' });
         }
-
-        // Option 1: Remove the employee from the database
-        // await employee.remove();
-
-        // Option 2: Update the employee's status to "deleted"
-        employee.status = "deleted";
-        await employee.save();
 
         res.status(200).json({ message: 'Employee and assigned leads removed successfully' });
     } catch (error) {
