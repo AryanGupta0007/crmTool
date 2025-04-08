@@ -20,7 +20,8 @@ const leadSchema = new mongoose.Schema({
     comment: { type: String, required: false , default: null},
     paymentProof: { type: String , default: null},
     addedToGroup: { type: String, enum: ["completed", "remaining"], default: "remaining" },
-    registeredOnApp: { type: String, enum: ["completed", "remaining"], default: "remaining" }
+    registeredOnApp: { type: String, enum: ["completed", "remaining"], default: "remaining" },
+    source: {type: String, default: "direct"}
     // Ensure this is a string to store the filename
 });
 

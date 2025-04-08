@@ -12,7 +12,6 @@ const employeeSchema = new mongoose.Schema({
         alloted: { type: Number, default: 0 },
         lead_details: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lead' }]
     }
-     
 });
 employeeSchema.pre('findOneAndDelete', async function (next) {
     const employee = await this.model.findOne(this.getFilter());  // Fetch employee being deleted

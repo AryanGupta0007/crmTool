@@ -18,6 +18,7 @@ exports.addLeads = async (req, res) => {
                 contactNumber: lead.contactNumber, 
                 email: lead.email,
                 status: lead.status,
+                source: lead.source,
                 boardsPass: lead.boardsPass,
                 boardsEnglish: lead.boardsEnglish,
                 boardsPCM: lead.boardsPCM,
@@ -38,7 +39,8 @@ exports.addLeads = async (req, res) => {
             filteredLeads = uniqueLeads.map(lead => ({
                 name: lead.name,
                 contactNumber: lead.contact,
-                email: lead.email
+                email: lead.email,
+                source: lead.source
             }));
         }
         // ...existing code...
@@ -285,6 +287,7 @@ exports.downloadEmployeeLeads = async (req, res) => {
             'formSs',
             'books',
             'booksSs',
+            'source',
             'assignedTo',
             'paymentVerified',
             'amount',
