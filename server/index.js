@@ -7,6 +7,7 @@ const employeeRoutes = require('../routes/employee'); // Correctly import employ
 const authRoutes = require('../routes/auth');
 const accountsRoutes = require('../routes/accountsRoutes'); // Add accounts routes
 const operationsRoutes = require('../routes/operationsRoutes'); // Add operations routes
+const genRoutes = require('../routes/gen'); // Add gen routes
 
 const path = require('path');
 const { verifyToken } = require('../controllers/authController');
@@ -41,6 +42,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/employee', verifyToken, employeeRoutes); // Use employee routes
 app.use('/api/accounts', accountsRoutes); // Use accounts routes
 app.use('/api/operations', operationsRoutes); // Use operations routes
+app.use('/api/gen', genRoutes); // Register gen routes
 
 // ✅ Serve static files AFTER API routes
 app.use(express.static(path.join(__dirname, '../../CRM-Frontend/dist')));
