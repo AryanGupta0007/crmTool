@@ -44,14 +44,29 @@ app.use('/api/accounts', accountsRoutes); // Use accounts routes
 app.use('/api/operations', operationsRoutes); // Use operations routes
 app.use('/api/gen', genRoutes); // Register gen routes
 
-// ✅ Serve static files AFTER API routes
-app.use(express.static(path.join(__dirname, '../../CRM-Frontend/dist')));
-app.get('*', function(req, res) {
-    res.sendFile(path.join(__dirname, '../../CRM-Frontend/dist', 'index.html'));
+// ✅ Dynamic route to serve uploaded files
+app.get('/uploads/:filename', (req, res) => {
+    let filePath;
+    try {
+        filePath = path.join(__dirname, 'uploads', '1f7ad6c890a0686f127861de12f42fda');
+    
+    }
+    catch(e){
+         filePath = path.join(__dirname, 'uploads', req.params.filename );
+    }
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error(`Error serving file: ${err}`);
+            res.status(404).send('File not found');
+        }
+    });
 });
 
-// ✅ Serve uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// ✅ Serve static files AFTER API routes
+app.use(express.static(path.join(__dirname, '../../client/CRM-Frontend/dist')));
+app.get('*', function(req, res) {
+    res.sendFile(path.join(__dirname, '../../client/CRM-Frontend/dist', 'index.html'));
+});
 
 // Start the server
 app.listen(PORT, () => {
