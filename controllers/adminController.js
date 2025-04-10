@@ -209,7 +209,7 @@ exports.getUnassignedLeads = async (req, res) => {
 
 exports.getLeads = async (req, res) => {
     try {
-        const leads = await Lead.find();
+        const leads = await Lead.find()
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leads', error });
@@ -333,7 +333,13 @@ exports.addBatch = async(req, res) => {
 exports.deleteEmployee = async (req, res) => {
     try {
         // console.log('here hit delete')
-        const { id } = req.params;
+        const { email } = req.params;
+        console.log(email)
+        const emp = await Employee.findOne({email: email})
+        const id = emp._id
+        console.log(emp)
+        // console.log("..", emp, id)
+        console.log(await Lead.find({assignedTo: id}))
         await Lead.deleteMany({assignedTo: id})
         const employee = await Employee.findOneAndDelete(id);
         if (!employee) {
