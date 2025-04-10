@@ -207,6 +207,20 @@ exports.getUnassignedLeads = async (req, res) => {
     }
 };
 
+exports.updateLeadStatus = async(req, res) => {
+    const {leadId, status} = req.body
+    if (status === "DEL"){
+        await Lead.findByIdAndDelete(leadId)
+        return res.status(200).json({msg: "lead deleted"})
+    }
+    const lead = await Lead.findById(leadId)
+    
+    lead.status = status
+    lead.save()
+    
+    return res.status(200).json({msg: "lead updated"})
+
+}
 exports.getLeads = async (req, res) => {
     try {
         const leads = await Lead.find()

@@ -23,4 +23,5 @@ router.post('/addBatch', authController.verifyToken, adminController.addBatch);
 router.get('/revenue-per-sale', adminController.getRevenuePerSale);
 router.put('/updateBatchStatus/:batchId', adminController.updateBatchStatus);
 router.get('/verified-leads', adminController.getVerifiedLeads)
+router.put('/updateLeadStatus', adminController.updateLeadStatus)
 module.exports = router;
