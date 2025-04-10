@@ -46,14 +46,8 @@ app.use('/api/gen', genRoutes); // Register gen routes
 
 // ✅ Dynamic route to serve uploaded files
 app.get('/uploads/:filename', (req, res) => {
-    let filePath;
-    try {
-        filePath = path.join(__dirname, 'uploads', '1f7ad6c890a0686f127861de12f42fda');
+    const filePath = path.join(__dirname, 'uploads', req.params.filename );
     
-    }
-    catch(e){
-         filePath = path.join(__dirname, 'uploads', req.params.filename );
-    }
     res.sendFile(filePath, (err) => {
         if (err) {
             console.error(`Error serving file: ${err}`);
