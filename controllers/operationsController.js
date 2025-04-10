@@ -2,7 +2,7 @@ const Lead = require('../models/Lead');
 
 exports.getClosedSuccessLeads = async (req, res) => {
     try {
-        const leads = await Lead.find({ status: 'closed-success' });
+        const leads = await Lead.find({ status: 'closed-success', paymentVerified: 'verified' });
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching closed-success leads', error });

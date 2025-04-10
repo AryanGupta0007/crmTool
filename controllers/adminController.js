@@ -45,7 +45,12 @@ exports.addLeads = async (req, res) => {
         }
         // ...existing code...
         const insertedLeads = [];
+        
         for (const lead of filteredLeads) {
+            const existLead = await Lead.findOne({contactNumber: lead.contactNumber})
+            if (existLead) {
+                continue;
+            }
             const newLead = new Lead(lead);
             await newLead.save();
             insertedLeads.push(newLead);
@@ -327,15 +332,17 @@ exports.addBatch = async(req, res) => {
 
 exports.deleteEmployee = async (req, res) => {
     try {
+        // console.log('here hit delete')
         const { id } = req.params;
+        await Lead.deleteMany({assignedTo: id})
         const employee = await Employee.findOneAndDelete(id);
-
         if (!employee) {
             return res.status(404).json({ message: 'Employee not found' });
         }
-
-        res.status(200).json({ message: 'Employee and assigned leads removed successfully' });
-    } catch (error) {
+        return  res.status(200).json({ message: 'Employee and assigned leads removed successfully' });
+    
+        } catch (error) {
+        console.log(error)
         res.status(500).json({ message: 'Error deleting employee', error });
     }
 };
