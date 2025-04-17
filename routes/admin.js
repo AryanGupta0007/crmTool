@@ -16,6 +16,7 @@ router.post('/assignLead', authController.verifyToken, adminController.assignLea
 router.get('/revenue', authController.verifyToken, adminController.getRevenue);
 router.get('/sales', authController.verifyToken, adminController.getSalesLeads); // Add sales route
 router.put('/updateNeededLeads/:id', authController.verifyToken, adminController.updateNeededLeads); // Add route to update needed leads
+router.get('/resetNeededLeads', authController.verifyToken, adminController.resetNeededLeads); // Add route to update needed leads
 router.get('/download-leads/:employeeId', authController.verifyToken, adminController.downloadEmployeeLeads);
 router.delete('/employee/:email', authController.verifyToken, adminController.deleteEmployee);
 router.get('/batches', authController.verifyToken, adminController.getBatches);
@@ -24,4 +25,5 @@ router.get('/revenue-per-sale', adminController.getRevenuePerSale);
 router.put('/updateBatchStatus/:batchId', adminController.updateBatchStatus);
 router.get('/verified-leads', adminController.getVerifiedLeads)
 router.put('/updateLeadStatus', adminController.updateLeadStatus)
+router.post('/getCallerLeads', adminController.getCallerLeads)
 module.exports = router;

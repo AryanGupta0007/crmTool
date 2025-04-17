@@ -9,14 +9,13 @@ exports.addLeads = async (req, res) => {
         // Parse the Excel file
         const leads = excelService.parseExcel(req.file.path);
         const uniqueLeads = await excelService.processLeads(leads);
-        
+        console.log("uniques: ",  uniqueLeads)
         // If extended fields are present, map all fields; otherwise, use fallback mapping
         let filteredLeads;
         if(uniqueLeads.length > 0 && uniqueLeads[0].hasOwnProperty("status")){
             filteredLeads = uniqueLeads.map(lead => ({
                 name: lead.name,
                 contactNumber: lead.contactNumber, 
-                email: lead.email,
                 status: lead.status,
                 source: lead.source,
                 boardsPass: lead.boardsPass,
@@ -38,8 +37,7 @@ exports.addLeads = async (req, res) => {
         } else {
             filteredLeads = uniqueLeads.map(lead => ({
                 name: lead.name,
-                contactNumber: lead.contact,
-                email: lead.email,
+                contactNumber: lead.contactNumber,
                 source: lead.source
             }));
         }
@@ -130,6 +128,29 @@ exports.updateNeededLeads = async (req, res) => {
         res.status(200).json(employee);
     } catch (error) {
         res.status(500).json({ message: 'Error updating needed leads', error });
+    }
+};
+
+
+exports.resetNeededLeads = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const employees = await Employee.find({type: "sales"});
+        if (!employees || employees.length === 0) {
+            return res.status(404).json({ message: 'Employees not found' });
+        }
+        
+        employees.forEach(async (employee) => {
+            if (employee.leads && typeof employee.leads === 'object') {
+                employee.leads.needed = 0;
+                await employee.save();
+            }
+        });
+        
+        console.log(employees);
+        return res.status(200).json(employees);
+    } catch (error) {
+        return res.status(500).json({ message: 'Error updating needed leads', error });
     }
 };
 
@@ -405,3 +426,17 @@ exports.getVerifiedLeads = async (req, res) => {
         res.status(500).json({ message: 'Error fetching verified leads', error });
     }
 };
+
+exports.getCallerLeads = async (req, res) => {
+    try{
+        const {callerId} = req.body
+        const leads = await Lead.find({assignedTo: callerId})
+        console.log(leads)
+        return res.status(200).json({leads, msg: "leads fetched success" })
+    }
+    catch(error){
+        console.log(error)
+        return res.status(500).json({msg: "error"})
+    }
+}
+ 

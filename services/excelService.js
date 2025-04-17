@@ -38,9 +38,7 @@ exports.processLeads = async (leads) => {
         return leads.map(lead => ({
             name: lead.name,
             contactNumber: lead.contact,  // map "contact" to contactNumber
-            email: lead.email,
-            source: lead.source,
-            status: "new"
+            source: lead.source
         }));
     }
 };
