@@ -45,10 +45,10 @@ exports.addLeads = async (req, res) => {
         const insertedLeads = [];
         
         for (const lead of filteredLeads) {
-            const existLead = await Lead.findOne({contactNumber: lead.contactNumber})
-            if (existLead) {
-                continue;
-            }
+            // const existLead = await Lead.findOne({contactNumber: lead.contactNumber})
+            // if (existLead) {
+            //     continue;
+            // }
             const newLead = new Lead(lead);
             await newLead.save();
             insertedLeads.push(newLead);
