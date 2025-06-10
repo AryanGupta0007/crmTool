@@ -244,7 +244,7 @@ exports.updateLeadStatus = async(req, res) => {
 }
 exports.getLeads = async (req, res) => {
     try {
-        const leads = await Lead.find()
+        const leads = await Lead.find().sort({ lastModified: -1 })
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leads', error });
@@ -256,6 +256,7 @@ exports.assignLead = async (req, res) => {
         const { leadId, callerId } = req.body;
         const lead = await Lead.findById(leadId);
         lead.assignedTo = callerId;
+        lead.lastModified = new Date(); 
         await lead.save();
         res.status(200).json(lead);
     } catch (error) {

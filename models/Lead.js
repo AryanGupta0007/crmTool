@@ -20,7 +20,8 @@ const leadSchema = new mongoose.Schema({
     addedToGroup: { type: String, enum: ["completed", "remaining"], default: "remaining" },
     registeredOnApp: { type: String, enum: ["completed", "remaining"], default: "remaining" },
     source: {type: String, default: "direct"},
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+    lastModified: { type: Date, default: Date.now } // Automatically set on creation and updated manually
     // Ensure this is a string to store the filename
 });
 

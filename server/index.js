@@ -24,6 +24,13 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.ots.includes('JSON')) {
+    console.error('Bad JSON received:', err.message);
+    return res.status(400).send({ message: 'Invalid JSON payload in request' });
+  }
+  next(err); // Pass other errors to the default error handler
+});
 // Disable ETag and remove Last-Modified to prevent 304 Not Modified issues
 app.disable('etag');
 app.use((req, res, next) => {

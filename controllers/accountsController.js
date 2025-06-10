@@ -3,7 +3,7 @@ const Batch = require('../models/Batch');
 
 exports.getUnderReviewLeads = async (req, res) => {
     try {
-        const leads = await Lead.find({ status: 'under-review' });
+        const leads = await Lead.find({ status: 'under-review' }).sort({ lastModified: -1 });
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching closed-success leads', error });

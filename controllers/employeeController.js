@@ -70,7 +70,7 @@ exports.uploadPaymentProof = async (req, res) => {
 
 exports.getLeads = async (req, res) => {
     try {
-        const leads = await Lead.find({ assignedTo: req.userId });
+        const leads = await Lead.find({ assignedTo: req.userId }).sort({ lastModified: -1 });
         // console.log(leads)
         res.status(200).json(leads);
     } catch (error) {
